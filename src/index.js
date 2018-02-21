@@ -37,10 +37,7 @@ class MusicPlayer extends React.Component {
 		super(props);
 		this.state = {
 			initial: true,
-			audioFiles: [],
-			artists: [],
-			titles: [],
-			albumArts: [],
+			tracks: [],
 			songCount: 0,
 			nowPlaying: undefined,
 			status: "play",
@@ -50,23 +47,12 @@ class MusicPlayer extends React.Component {
 	componentDidMount() {
 		// Get the array of tracks from the json supplied in result.
 		let tracks = result["main"];
-		let audioFile = [], artist = [], title = [], albumArt = [];
-		tracks.forEach((element) => {
-			audioFile.push(element["music"]);
-			artist.push(element["artist"]);
-			title.push(element["music"]);
-			albumArt.push(element["albumArt"]);
-		});
-
 		// After setting the state, load the first song and then proceed to create and display the appropriate thumbnail.
 		// The second action (creating of thumbnail) is passed as a callback function to the createSong function where the 
 		// callback is handled.
 		this.setState((prevState) => {
 			return {
-				audioFiles: audioFile,
-				artists: artist,
-				titles: title,
-				albumArts: albumArt,
+				tracks: tracks,
 			}
 		}, () => this.createSong(this.createThumb));
 	}
@@ -84,15 +70,13 @@ class MusicPlayer extends React.Component {
 
 		// Create a new Howler object and load the appropriate song.
 		let song = new Howl({
-			src: [require('./music/' + this.state.audioFiles[this.state.songCount])],
+			src: [require('./music/' + this.state.tracks[this.state.songCount]["music"])],
 			onload: () => {
 				// If this is the first time a song is being loaded, don't play automatically.
 				// Otherwise, play the song automatically.
 				if (this.state.initial) this.setState({initial: false});
-				else {
-					this.state.nowPlaying.play();;
-					this.createDuration(this);
-				}
+				else this.state.nowPlaying.play();				
+				this.createDuration(this);
 			},
 			onplay: () => {
 				playImage.src = pauseButton;
@@ -123,14 +107,14 @@ class MusicPlayer extends React.Component {
 	}
 
 	createThumb(caller, callback) {
-		let art = require('./album_art/' + caller.state.albumArts[caller.state.songCount] + '.jpg');
+		let art = require('./album_art/' + caller.state.tracks[caller.state.songCount]["albumArt"] + '.jpg');
 		document.getElementById('thumbnail').src = art;
 		callback ? callback(caller) : 0;
 	}
 
 	createInfo(caller, callback) {
-		let artist = caller.state.artists[caller.state.songCount];
-		let title = caller.state.titles[caller.state.songCount].replace(/.mp3|.m4a/, '');
+		let artist = caller.state.tracks[caller.state.songCount]["artist"];
+		let title = caller.state.tracks[caller.state.songCount]["music"].replace(/.mp3|.m4a/, '');
 		document.getElementById('artist').textContent = artist;
 		document.getElementById('title').textContent = title;
 		callback ? callback(caller) : 0;
@@ -159,13 +143,13 @@ class MusicPlayer extends React.Component {
 
 	skipTrack() {
 		this.setState((prevState) => {
-			return {songCount: ((prevState.songCount === this.state.audioFiles.length - 1) ? 0 : prevState.songCount + 1)}
+			return {songCount: ((prevState.songCount === this.state.tracks.length - 1) ? 0 : prevState.songCount + 1)}
 		}, () => this.createSong(this.createThumb));
 	}
 
 	backTrack() {
 		this.setState((prevState) => {
-			return {songCount: ((prevState.songCount === 0) ? this.state.audioFiles.length - 1 : prevState.songCount - 1)}
+			return {songCount: ((prevState.songCount === 0) ? this.state.tracks.length - 1 : prevState.songCount - 1)}
 		}, () => this.createSong(this.createThumb));
 	}
 
