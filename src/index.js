@@ -49,13 +49,13 @@ class MusicPlayer extends React.Component {
 
 	componentDidMount() {
 		// Get the array of tracks from the json supplied in result.
-		let tracks = result["main"];
+		let tracks = result.tracks;
 		let audioFile = [], artist = [], title = [], albumArt = [];
 		tracks.forEach((element) => {
-			audioFile.push(element["music"]);
-			artist.push(element["artist"]);
-			title.push(element["music"]);
-			albumArt.push(element["albumArt"]);
+			audioFile.push(element.url);
+			artist.push(element.artist.name);
+			title.push(element.title);
+			albumArt.push(element.thumbnail);
 		});
 
 		// After setting the state, load the first song and then proceed to create and display the appropriate thumbnail.
@@ -84,7 +84,7 @@ class MusicPlayer extends React.Component {
 
 		// Create a new Howler object and load the appropriate song.
 		let song = new Howl({
-			src: [require('./music/' + this.state.audioFiles[this.state.songCount])],
+			src: [(this.state.audioFiles[this.state.songCount])],
 			onload: () => {
 				// If this is the first time a song is being loaded, don't play automatically.
 				// Otherwise, play the song automatically.
@@ -123,7 +123,7 @@ class MusicPlayer extends React.Component {
 	}
 
 	createThumb(caller, callback) {
-		let art = require('./album_art/' + caller.state.albumArts[caller.state.songCount] + '.jpg');
+		let art = ( caller.state.albumArts[caller.state.songCount]);
 		document.getElementById('thumbnail').src = art;
 		callback ? callback(caller) : 0;
 	}
